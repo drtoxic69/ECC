@@ -31,3 +31,16 @@ class FieldElement:
             raise TypeError("Can not multiply the elements of different Field.")
 
         return FieldElement((self.num * other.num) % self.prime, self.prime)
+
+
+    def __pow__(self, exponent: int):
+       
+        exponent = exponent % (self.prime - 1)
+        return FieldElement(pow(self.num, self.exponet, self.prime), self.prime)
+
+
+    def __repr__(self):
+
+        return f"F_({self.prime}({self.num}))"
+
+
