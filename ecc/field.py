@@ -1,3 +1,26 @@
+# Defination of Field E(Z/pZ) for the elliptic curve : y^2 = x^3 + ax + b
+#
+# The Group operation for the curve are under the Field E(Z/pZ). 
+# The operations like : - Addidtion      (+)
+#                       - Multiplication (*)
+#                       - Subtraction    (-)
+# 
+# For the operation   : - Power          (^)
+# 
+# We use the Fermat's Little Theorem. As we have to compute a^k for all 
+# a and k are integers. We know that a^(p-1) = 1 (mod p) for all p = prime.
+# Then : 
+#               a^m(p-1) = 1 (mod p)
+# 
+# Let k be some integer such that k = q(p-1) + r.
+#               
+#               a^k = a^(q(p-1) + r)    (mod p)
+#               a^k = (a^(p-1))^q * a^r (mod p)
+#               a^k = a^r               (mod p)
+#               a^k = a^(k mod p-1)     (mod p)
+# 
+
+
 class FieldElement:
 
     def __init__(self, num: int, prime: int):
