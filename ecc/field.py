@@ -7,3 +7,27 @@ class FieldElement:
 
         self.num   = num
         self.prime = prime
+
+    
+    def __add__(self, other):
+        
+        if self.prime != other.prime:
+            raise TypeError("Can not add the elements of different Field.")
+
+        return FieldElement((self.num + other.num) % self.prime, self.prime)
+
+
+    def __sub__(self, other):
+        
+        if self.prime != other.prime:
+            raise TypeError("Can not subtract the elements of different Field.")
+
+        return FieldElement((self.num - other.num) % self.prime, self.prime)
+
+    
+    def __mul__(self, other):
+
+        if self.prime != other.prime:
+            raise TypeError("Can not multiply the elements of different Field.")
+
+        return FieldElement((self.num * other.num) % self.prime, self.prime)
