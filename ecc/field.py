@@ -1,7 +1,7 @@
-# Defination of Field E(Z/pZ) for the elliptic curve : y^2 = x^3 + ax + b
+# Definition of Field E(Z/pZ) for the elliptic curve : y^2 = x^3 + ax + b
 #
 # The Group operation for the curve are under the Field E(Z/pZ). 
-# The operations like : - Addidtion      (+)
+# The operations like : - Addition       (+)
 #                       - Multiplication (*)
 #                       - Subtraction    (-)
 # 
@@ -55,15 +55,23 @@ class FieldElement:
 
         return FieldElement((self.num * other.num) % self.prime, self.prime)
 
+    
+    def __eq__(self, other):
+        
+        if other is None:
+            return False
+
+        return self.num == other.num and self.prime == other.prime
+
 
     def __pow__(self, exponent: int):
        
         exponent = exponent % (self.prime - 1)
-        return FieldElement(pow(self.num, self.exponet, self.prime), self.prime)
+        return FieldElement(pow(self.num, exponent, self.prime), self.prime)
 
 
     def __repr__(self):
 
-        return f"F_({self.prime}({self.num}))"
+        return f"F_{self.prime}({self.num})"
 
 
