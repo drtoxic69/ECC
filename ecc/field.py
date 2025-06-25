@@ -18,7 +18,6 @@
 #               a^k = (a^(p-1))^q * a^r (mod p)
 #               a^k = a^r               (mod p)
 #               a^k = a^(k mod p-1)     (mod p)
-# 
 
 
 class FieldElement:
@@ -62,6 +61,23 @@ class FieldElement:
             return False
 
         return self.num == other.num and self.prime == other.prime
+
+   
+    def __rmul__(self, coefficient):
+
+        res = (coefficient * self.num) % self.prime
+        return FieldElement(res, self.prime)
+
+
+    def __truediv__(self, other):
+
+        if self.prime != other.prime:
+            raise TypeError("Can not divide the elements of different Field.")
+
+        inv = pow(other.num, -1, self.prime)
+        num = (self.num * inv) % self.prime
+
+        return FieldElement(num, self.prime)
 
 
     def __pow__(self, exponent: int):
