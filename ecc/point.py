@@ -56,3 +56,32 @@ class Point:
         return Point(None, None, self.curve)
 
 
+    def __eq__(self, other):
+        
+        if not isinstance(other, Point):
+            return False
+
+        return self.x == other.x and self.y == other.y and self.curve == other.curve
+
+
+    def __rmul__(self, coefficient):
+
+        result = Point(None, None, self.curve)
+        addend = self
+
+        # Double and Add Algorithm
+        while coefficient:
+            if coefficient & 1:
+                result = result + addend
+            addend = addend + addend
+            coefficient >>= 1
+
+        return result
+
+
+    def __repr__(self):
+
+        if self.x is None:
+            return "Point(infinity)"
+
+        return f"Point(\n\t{self.x.num}, \n\t{self.y.num}\n)"
