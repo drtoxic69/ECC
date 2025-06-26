@@ -1,3 +1,48 @@
+# Definition of Point on the curve : y^2 = x^3 + ax + b
+#
+# Group operation for the elliptic curve.
+# The operations are: 
+#                   - Addition 
+#                   - Scalar Multiplication
+# 
+# For Addition:     
+#
+# Let's say we have two distinct point P and Q, we want 
+# to do P + Q, so we find the line passing through both 
+# the points P and Q, and this would intersect the curve 
+# at a point -R, we find the reflection of -R to get R. 
+# Such that :  
+#                      P + Q = R
+# 
+# So, we find the slope of the line passing through P & Q.
+# 
+#               s  = (yp - yq)/(xp - xq)
+#               xr = s^2 - (xp + xq)
+#               yr = s(xp - xr) - yp
+# 
+# But, if P and Q are the same point, then we have to find
+# 2P. To find 2P, we have to find the slope of the tangent
+# at the point P, we can do that by finding the derivative 
+# of the curve. 
+#                     2P = P + P
+#
+# So, the derivative of the curve would be 
+# 
+#               s  = (3xp + a)/2yp
+#               xr = s^2 - 2xp
+#               yr = s(xp - xr) - yp
+# 
+# 
+# For Scalar Multiplication: 
+# 
+# Let's say for a Point P in the curve and let there be a 
+# scalar k that belongs to Z. Then k * P is just adding P
+# k times. We do this by Double and Add Algorithm.
+# 
+#               Q = k * P 
+#               Q = P + P + ... + P (k times)
+
+
 from .field import FieldElement
 
 
@@ -85,3 +130,5 @@ class Point:
             return "Point(infinity)"
 
         return f"Point(\n\t{self.x.num}, \n\t{self.y.num}\n)"
+
+

@@ -1,3 +1,44 @@
+# Definition of the Elliptic Curve.
+# 
+# First, we check if the curve is singular, meaning if the 
+# discriminant of the curve is 0. We discard such curves 
+# because if the discriminant is 0, it means the curve has
+# cusps or self-intersection. We do not use such curves in 
+# cryptography.
+# 
+# For any polynomial, the discriminant gives the criterion 
+# for whether the polynomial has repeated roots or not.
+# 
+# For a cubic polynomial:
+#               f(x) = (x - α)(x - β)(x - γ)
+# 
+# Therefore, the discriminant is given by,
+#               ∆ = a^4 (α−β)^2 (β−γ)^2 (γ−α)^2
+# 
+# So, for a Elliptic curve in defined by the short Weierstrass 
+# form: 
+#               y^2 = x^3 + ax + b
+# 
+# Full discriminant formula: 
+#               ∆ = -16(4a^3 + 27b^2)
+# 
+# 
+# Elliptic Curve Discreate Logarithmic Problem:
+# 
+# Scalar Muiltiplication -> one way function 
+# over the Field E(Z/pZ)
+# 
+# Let there be a point G such that G belongs to E(Z/pZ) and 
+# G generates all the points in the Field E(Z/pZ). 
+# 
+# So, we can say that the Co-factor,
+# 
+#               h = |E(Z/pZ)|/n where n = ord(G)
+# 
+# Usually we select G such that h = 1. 
+# 
+# So, Therefore, the Domain parameters are {P, a, b, G, n, h}. 
+# The domain parameters are public. 
 
 
 class Curve:
