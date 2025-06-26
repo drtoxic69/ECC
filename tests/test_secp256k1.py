@@ -5,6 +5,7 @@ from ecc import secp256k1
 def test_generator_point():
     Gx, Gy = secp256k1.G
     G = Point(Gx, Gy, secp256k1)
+
     assert G
 
 
@@ -21,3 +22,9 @@ def test_scalar_multiplication():
     assert G_check == G
 
 
+def test_point_order():
+    Gx, Gy = secp256k1.G
+    G = Point(Gx, Gy, secp256k1)
+    infinity = secp256k1.n * G
+
+    assert (infinity.x, infinity.y) == (None, None) 
