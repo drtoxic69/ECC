@@ -24,3 +24,13 @@ def test_subtraction():
     assert b - a == FieldElement(5, 13)
 
 
+def test_scalar_multiplication():
+    a = FieldElement(7, 13)
+    k = 2
+    assert k * a == FieldElement(1, 13)
+
+
+def test_division():
+    a = FieldElement(7, 13)
+    b = FieldElement(3, 13)
+    assert a / b == FieldElement(11, 13)
