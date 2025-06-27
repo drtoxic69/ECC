@@ -27,4 +27,4 @@ def test_point_order():
     G = Point(Gx, Gy, secp256k1)
     infinity = secp256k1.n * G
 
-    assert (infinity.x, infinity.y) == (None, None) 
+    assert (infinity.x, infinity.y) == (None, None)

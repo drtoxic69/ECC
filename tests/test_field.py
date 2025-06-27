@@ -9,7 +9,7 @@ def test_addition():
 
 def test_exponentiation():
     a = FieldElement(3, 13)
-    assert a ** 12 == FieldElement(1, 13)
+    assert a**12 == FieldElement(1, 13)
 
 
 def test_multiplication():

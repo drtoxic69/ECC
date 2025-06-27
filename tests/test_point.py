@@ -1,6 +1,5 @@
 from ecc import Point
 from ecc import Curve
-from ecc import FieldElement
 
 
 G = (5, 1)
@@ -8,6 +7,7 @@ P = 17
 n = 19
 
 curve = Curve(2, 2, P, G, n)
+
 
 def test_point_on_curve():
     p = Point(3, 1, curve)
@@ -36,5 +36,3 @@ def test_scalar_multiplication():
 def test_infinity():
     p = Point(5, 1, curve)
     assert Point(None, None, curve) == n * p
-
-

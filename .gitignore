@@ -1,5 +1,15 @@
 # python
 __pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+.python-version
+
+# Virtual environments
+.venv
+.env
 
 # macos
 .DS_Store
