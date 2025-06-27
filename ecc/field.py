@@ -56,6 +56,7 @@ class FieldElement:
 
         return self.num == other.num and self.prime == other.prime
 
+
     def __rmul__(self, coefficient):
         res = (coefficient * self.num) % self.prime
         return FieldElement(res, self.prime)

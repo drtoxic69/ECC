@@ -47,7 +47,15 @@ from .field import FieldElement
 
 
 class Point:
-    def __init__(self, x, y, curve):
+    """
+    Point(x, y, curve) is a point (x, y) on the 'curve'.
+    
+    Arguments:
+    x, y    : (x, y) on the curve over the Field E(Z/pZ)
+    curve   : Elliptic curve over the Field E(Z/pZ)
+
+    """
+    def __init__(self, x: int, y: int, curve):
         self.curve = curve
         self.prime = curve.P
 
