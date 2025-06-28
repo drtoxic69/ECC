@@ -26,7 +26,7 @@ class PrivateKey:
             self.secret = randbelow(curve.n - 1) + 1
 
         else:
-            if secret not in range(1, curve.n + 1):
+            if secret not in range(1, curve.n):
                 raise ValueError(f"PrivateKey must be in between 1 and {curve.n - 1}.")
 
             self.secret = secret
