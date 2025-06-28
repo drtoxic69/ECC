@@ -1,3 +1,26 @@
+# Implementation of ECDSA (Elliptic Curve Digital Signature Algorithm)
+#
+# ECDSA is a digital signature algorithm that uses elliptic curve cryptography.
+#
+# The algorithm consists of two main operations:
+# 1. Signature Generation (Sign)
+# 2. Signature Verification (Verify)
+#
+# For signing a message:
+# 1. Generate a random number k in range [1, n-1]
+# 2. Calculate point (x1, y1) = k * G
+# 3. Calculate r = x1 mod n (if r = 0, go back to step 1)
+# 4. Calculate s = k^(-1) * (z + r * private_key) mod n (if s = 0, go back to step 1)
+# 5. The signature is (r, s)
+#
+# For verifying a signature:
+# 1. Calculate w = s^(-1) mod n
+# 2. Calculate u1 = z * w mod n
+# 3. Calculate u2 = r * w mod n
+# 4. Calculate point (x1, y1) = u1 * G + u2 * public_key
+# 5. Verify that r ≡ x1 (mod n)
+
+
 import hashlib
 from secrets import randbelow
 
