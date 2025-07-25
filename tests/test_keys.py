@@ -47,4 +47,4 @@ def test_keypair_generation_secp256k1():
 
     point = public.point
     if (point.x, point.y) != (None, None):
-        assert point.y**2 == point.x**3 + point.a * point.x + point.b
+        assert point.y**2 == point.x**3 + secp256k1.a * point.x + secp256k1.b

@@ -11,7 +11,7 @@ curve = Curve(2, 2, P, G, n)
 
 def test_point_on_curve():
     p = Point(3, 1, curve)
-    assert p.y**2 == p.x**3 + p.a * p.x + p.b
+    assert p.y**2 == p.x**3 + curve.a * p.x + curve.b
 
 
 def test_addition():
