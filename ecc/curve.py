@@ -1,48 +1,17 @@
-# Definition of the Elliptic Curve.
-#
-# First, we check if the curve is singular, meaning if the
-# discriminant of the curve is 0. We discard such curves
-# because if the discriminant is 0, it means the curve has
-# cusps or self-intersection. We do not use such curves in
-# cryptography.
-#
-# For any polynomial, the discriminant gives the criterion
-# for whether the polynomial has repeated roots or not.
-#
-# For a cubic polynomial:
-#               f(x) = (x - α)(x - β)(x - γ)
-#
-# Therefore, the discriminant is given by,
-#               ∆ = a^4 (α−β)^2 (β−γ)^2 (γ−α)^2
-#
-# So, for a Elliptic curve in defined by the short Weierstrass
-# form:
-#               y^2 = x^3 + ax + b
-#
-# Full discriminant formula:
-#               ∆ = -16(4a^3 + 27b^2)
-#
-#
-# Elliptic Curve Discreate Logarithmic Problem:
-#
-# Scalar Muiltiplication -> one way function
-# over the Field E(Z/pZ)
-#
-# Let there be a point G such that G belongs to E(Z/pZ) and
-# G generates all the points in the Field E(Z/pZ).
-#
-# So, we can say that the Co-factor,
-#
-#               h = |E(Z/pZ)|/n where n = ord(G)
-#
-# Usually we select G such that h = 1.
-#
-# So, Therefore, the Domain parameters are {P, a, b, G, n, h}.
-# The domain parameters are public.
+"""
+This module defines the Curve class, representing an elliptic curve
+in the short Weierstrass form.
+"""
 
+from __future__ import annotations
+from functools import cached_property
+
+from .field import FieldElement
+from .point import Point
 
 class Curve:
-    def __init__(self, a, b, P, G, n, h=1):
+    """Represents an elliptic curve y² = x³ + ax + b over a finite field Fp or E(Z/pZ)."""
+    def __init__(self, a: int, b: int, P: int, G: tuple[int, int], n: int, h: int = 1, name: str = None):
         """
         parameters:
         a, b    : Curve parameters (y^2 = x^3 + ax + b).
@@ -50,20 +19,43 @@ class Curve:
         G       : Generator point.
         n       : Order of Generator point.
         h       : Co-factor (usually 1).
+        name    : Name of the curve. (optional)
         """
 
-        self.a = a
-        self.b = b
+        self.a = FieldElement(a, P)
+        self.b = FieldElement(b, P)
 
         self.P = P
-        self.G = G
         self.n = n
+        self.h = h
+        self.name = name
+
+        self._G = G
 
         # Check if the curve is singular
-        if 4 * (a**2) + 27 * (b**2) == 0:
+        if 4 * (a**3) + 27 * (b**2) == 0:
             raise ValueError(
                 "This is a singular curve (discriminant is zero). Choose different parameters for the curve."
             )
 
-    def __repr__(self):
-        return f"Curve: y^2 = x^3 + {self.a}x + {self.b} over the Field(Z/{self.P}Z)."
+    @cached_property
+    def G(self) -> Point:
+        return Point(
+            x = self._G[0],
+            y = self._G[1],
+            curve = self
+        )
+
+    def __repr__(self) -> str:
+        if self.name:
+            return f"Curve({self.name})"
+        return f"Curve(y² = x³ + {self.a.num}x + {self.b.num} mod {self.P})"
+
+    def __eq__(self, other) -> bool:
+        if not isinstance(other, Curve):
+            return NotImplemented
+
+        return (self.P == other.P and
+                self.a == other.a and
+                self.b == other.b and
+                self._G == other._G)
