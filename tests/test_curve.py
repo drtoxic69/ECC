@@ -3,6 +3,7 @@ from ecc import Curve, Point
 
 curve = Curve(P=17, a=2, b=2, G=(5, 1), n=19, h=1, name="toy_curve")
 
+
 class TestCurve:
     """Tests the functionality of the Curve class."""
 
@@ -16,7 +17,7 @@ class TestCurve:
     def test_repr(self):
         """Test the __repr__ method for a clean representation."""
         assert repr(curve) == "Curve(toy_curve)"
-        
+
         # Test representation for a curve without a name
         unnamed_curve = Curve(P=17, a=2, b=2, G=(5, 1), n=19)
         assert repr(unnamed_curve) == "Curve(y² = x³ + 2x + 2 mod 17)"
@@ -26,8 +27,8 @@ class TestCurve:
         curve1 = Curve(P=17, a=2, b=2, G=(5, 1), n=19)
         curve2 = Curve(P=17, a=2, b=2, G=(5, 1), n=19)
         assert curve1 == curve2
-        
-        curve3 = Curve(P=19, a=2, b=2, G=(5, 1), n=19) # Different prime
+
+        curve3 = Curve(P=19, a=2, b=2, G=(5, 1), n=19)
         assert curve1 != curve3
 
     def test_generator_property(self):
@@ -38,7 +39,8 @@ class TestCurve:
         assert G.curve == curve
 
         G2 = curve.G
-        assert id(G) == id(G2) 
+        assert id(G) == id(G2)
+
 
 class TestCurveErrors:
     """Tests the error handling of the Curve class."""

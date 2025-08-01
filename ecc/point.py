@@ -5,7 +5,7 @@ It includes the implementation of elliptic curve group operations such
 as point addition and constant-time scalar multiplication using a
 Montgomery Ladder to protect against side-channel attacks.
 
-Definition of Point on the curve : y^2 = x^3 + ax + b
+Definition of Point on the curve : y² = x³ + ax + b
 
 Group operation for the elliptic curve.
 The operations are:
@@ -54,24 +54,11 @@ class Point:
         Such that :
                              P + Q = R
 
-        So, we find the slope of the line passing through P & Q.
-
-                      s  = (yp - yq)/(xp - xq)
-                      xr = s^2 - (xp + xq)
-                      yr = s(xp - xr) - yp
-
         But, if P and Q are the same point, then we have to find
         2P. To find 2P, we have to find the slope of the tangent
         at the point P, we can do that by finding the derivative
         of the curve.
                             2P = P + P
-
-        So, the derivative of the curve would be
-
-                      s  = (3xp + a)/2yp
-                      xr = s^2 - 2xp
-                      yr = s(xp - xr) - yp
-
         """
         if self.curve != other.curve:
             raise TypeError("Points are not on the same curve.")

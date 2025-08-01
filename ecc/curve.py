@@ -9,9 +9,20 @@ from functools import cached_property
 from .field import FieldElement
 from .point import Point
 
+
 class Curve:
     """Represents an elliptic curve y² = x³ + ax + b over a finite field Fp or E(Z/pZ)."""
-    def __init__(self, a: int, b: int, P: int, G: tuple[int, int], n: int, h: int = 1, name: str = None):
+
+    def __init__(
+        self,
+        a: int,
+        b: int,
+        P: int,
+        G: tuple[int, int],
+        n: int,
+        h: int = 1,
+        name: str = None,
+    ):
         """
         parameters:
         a, b    : Curve parameters (y^2 = x^3 + ax + b).
@@ -40,11 +51,7 @@ class Curve:
 
     @cached_property
     def G(self) -> Point:
-        return Point(
-            x = self._G[0],
-            y = self._G[1],
-            curve = self
-        )
+        return Point(x=self._G[0], y=self._G[1], curve=self)
 
     def __repr__(self) -> str:
         if self.name:
@@ -55,7 +62,9 @@ class Curve:
         if not isinstance(other, Curve):
             return NotImplemented
 
-        return (self.P == other.P and
-                self.a == other.a and
-                self.b == other.b and
-                self._G == other._G)
+        return (
+            self.P == other.P
+            and self.a == other.a
+            and self.b == other.b
+            and self._G == other._G
+        )

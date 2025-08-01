@@ -20,13 +20,13 @@ class TestFieldElementErrors:
         with pytest.raises(
             TypeError, match="Cannot operate on FieldElements from different fields."
         ):
-            c = a + b
+            a + b
 
     def test_division_by_zero(self):
         a = FieldElement(7, 13)
         b = FieldElement(0, 13)
         with pytest.raises((ValueError, ZeroDivisionError)):
-            c = a / b
+            a / b
 
 
 # --- Testing Edge Cases and Reflected Operations ---
