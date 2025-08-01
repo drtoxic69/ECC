@@ -52,3 +52,9 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["ecc"]
+
+[project.optional-dependencies]
+test = [
+    "pytest",
+    "hypothesis",
+]
