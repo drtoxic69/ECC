@@ -1,6 +1,9 @@
 """
 This module provides classes for generating and managing elliptic curve key pairs.
 
+Provides classes for generating and managing elliptic curve key pairs.
+Includes methods for creating and verifying digital signatures.
+
 A key pair consists of a private key (a secret integer) and a public key
 (a point on the curve derived from the private key).
 
@@ -13,61 +16,113 @@ Public Key - The point P = k * G, on the elliptic curve with Field E(Z/pZ)
 from __future__ import annotations
 from functools import cached_property
 from secrets import randbelow
+import hashlib
 
 from .curve import Curve
 from .point import Point
+from .ecdsa import Signature, _rfc6979_nonce
 
 
 class PublicKey:
-    """Represents an elliptic curve public key, which is a point on the curve."""
+    """Represents an elliptic curve public key."""
 
     def __init__(self, point: Point):
-        """Initializes a PublicKey from a Point object."""
         self.point = point
 
     @property
     def curve(self) -> Curve:
-        """Dynamic shortcut to curve."""
+        """A convenient, read-only shortcut to the key's curve."""
         return self.point.curve
+
+    def verify(self, message: bytes, signature: Signature) -> bool:
+        """Verifies an ECDSA signature for a given message."""
+        n = self.curve.n
+        r, s = signature.r, signature.s
+
+        # 1. First check if the r and s are vaild, by checking if they are in the range[1, n]
+        if not (1 <= r < n and 1 <= s < n):
+            return False
+
+        # 2. Hash the message to get the integer 'z'
+        z = int.from_bytes(hashlib.sha256(message).digest(), "big")
+        s_inv = pow(s, -1, n)
+
+        u1 = (z * s_inv) % n
+        u2 = (r * s_inv) % n
+
+        # 3. calculate P = u1 * G + u2 * PublicKey, and check P.x == r
+        P = (u1 * self.curve.G) + (u2 * self.point)
+
+        if P.x is None:
+            return False
+
+        return P.x.num % n == r
 
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, PublicKey):
             return NotImplemented
+
         return self.point == other.point
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         if (self.point.x, self.point.y) == (None, None):
             return "PublicKey(Point(infinity))"
+
         return (
             f"PublicKey(\n\tx={hex(self.point.x.num)}, \n\ty={hex(self.point.y.num)}\n)"
         )
 
 
 class PrivateKey:
-    """Represents an elliptic curve private key, which is a secret integer."""
+    """Represents an elliptic curve private key."""
 
     def __init__(self, secret: int | None = None, *, curve: Curve):
-        """
-        Generates or wraps a private key for a given curve.
-
-        Args:
-            secret: The private key integer. If None, a new one is generated.
-            curve: The elliptic curve to use. Must be provided as a keyword argument.
-        """
         self.curve = curve
 
         if secret is None:
             self.secret = randbelow(curve.n - 1) + 1
+
         else:
             if not (1 <= secret < curve.n):
-                raise ValueError(f"PrivateKey must be in between 1 and {curve.n - 1}.")
+                raise ValueError(f"Secret must be in the range [1, {curve.n - 1}].")
             self.secret = secret
 
     @cached_property
     def public_key(self) -> PublicKey:
-        """The corresponding public key, calculated as P = secret * G."""
-        public_point = self.secret * self.curve.G
-        return PublicKey(public_point)
+        """The corresponding public key, calculated efficiently on first access."""
+        return PublicKey(self.secret * self.curve.G)
+
+    def sign(self, message: bytes) -> Signature:
+        """Generates an ECDSA signature for a given message."""
+        n = self.curve.n
+
+        # These are the steps to follow:
+        # 1. Hash the message to get the integer 'z'
+        z = int.from_bytes(hashlib.sha256(message).digest(), "big")
+
+        # 2. The RFC 6979 nonce function requires the raw hash digest
+        message_hash = z.to_bytes(32, "big")
+
+        # This loop is for the rare case that r or s is zero
+        while True:
+            # 3. Generate the nonce `k` using the correctly formatted hash
+            k = _rfc6979_nonce(self.secret, n, message_hash)
+
+            R = k * self.curve.G
+            r = R.x.num % n
+            if r == 0:
+                continue
+
+            k_inv = pow(k, -1, n)
+            s = (k_inv * (z + r * self.secret)) % n
+            if s == 0:
+                continue
+
+            # Enforce low-s value for non-malleability
+            if s > n // 2:
+                s = n - s
+
+            return Signature(r, s)
 
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, PrivateKey):
@@ -80,8 +135,7 @@ class PrivateKey:
 
 
 def generate_keypair(curve: Curve) -> tuple[PrivateKey, PublicKey]:
-    """Generates a (private_key, public_key) pair for a given curve."""
+    """A helper function to generate a new key pair on a given curve."""
     private_key = PrivateKey(curve=curve)
     public_key = private_key.public_key
-
     return private_key, public_key
