@@ -1,85 +1,87 @@
-# Generation of Private Key and Public Key.
-#
-# Private Key - A random number (k) in between 1 and n,
-#               where n is order of generator point G.
-#
-# Public Key - The point P = k * G, on the elliptic
-#              curve with Field E(Z/pZ)
-#
-# Here, we use the randbelow function from secrets
-# to get a random number in between 1 and n(curve.n).
-# Here, n is ord(G). G is the generator point, and
-# ord(n) is the no. of points G can generate. Usually
-# n is |E(Z/pZ)|, as we choose the generator point to
-# get all the points in the Field E(Z/pZ).
-#
-# The random number we get is our Private Key. And we
-# multiply the random number with the generator point
-# G to get our Public Key.
-#
-#       secret -> random number between (1, n)
-#       public_key -> point
-#
-#       private_key = PrivateKey(secret, curve)
-#
-#       public_key = private_key.public_key()
-#       public_key = secret * G
+"""
+This module provides classes for generating and managing elliptic curve key pairs.
 
+A key pair consists of a private key (a secret integer) and a public key
+(a point on the curve derived from the private key).
 
+Private Key - A random number (k) in between 1 and n, where n is order of
+              generator point G.
+
+Public Key - The point P = k * G, on the elliptic curve with Field E(Z/pZ)
+"""
+
+from __future__ import annotations
+from functools import cached_property
 from secrets import randbelow
+
+from .curve import Curve
 from .point import Point
 
 
 class PublicKey:
-    def __init__(self, point: Point, curve):
-        self.point = point
-        self.curve = curve
+    """Represents an elliptic curve public key, which is a point on the curve."""
 
+    def __init__(self, point: Point):
+        """Initializes a PublicKey from a Point object."""
+        self.point = point
+
+    @property
+    def curve(self) -> Curve:
+        """Dynamic shortcut to curve."""
+        return self.point.curve
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, PublicKey):
+            return NotImplemented
+        return self.point == other.point
 
     def __repr__(self):
         if (self.point.x, self.point.y) == (None, None):
             return "PublicKey(Point(infinity))"
-        return f"PublicKey(\n\tx={hex(self.point.x.num)}, \n\ty={hex(self.point.y.num)}\n)"
+        return (
+            f"PublicKey(\n\tx={hex(self.point.x.num)}, \n\ty={hex(self.point.y.num)}\n)"
+        )
 
 
 class PrivateKey:
-    def __init__(self, secret=None, curve=None):
-        if curve is None:
-            raise ValueError("Curve must be specified.")
+    """Represents an elliptic curve private key, which is a secret integer."""
 
+    def __init__(self, secret: int | None = None, *, curve: Curve):
+        """
+        Generates or wraps a private key for a given curve.
+
+        Args:
+            secret: The private key integer. If None, a new one is generated.
+            curve: The elliptic curve to use. Must be provided as a keyword argument.
+        """
         self.curve = curve
 
         if secret is None:
             self.secret = randbelow(curve.n - 1) + 1
-
         else:
-            if secret not in range(1, curve.n):
+            if not (1 <= secret < curve.n):
                 raise ValueError(f"PrivateKey must be in between 1 and {curve.n - 1}.")
-
             self.secret = secret
 
-        self._public_key = None
+    @cached_property
+    def public_key(self) -> PublicKey:
+        """The corresponding public key, calculated as P = secret * G."""
+        public_point = self.secret * self.curve.G
+        return PublicKey(public_point)
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, PrivateKey):
+            return NotImplemented
+
+        return self.secret == other.secret and self.curve == other.curve
+
+    def __repr__(self) -> str:
+        return "PrivateKey(secret=...)"
 
 
-    def public_key(self):
-        if self._public_key is None:
-
-            Gx, Gy = self.curve.G
-            G = Point(Gx, Gy, self.curve)
-            p = self.secret * G
-
-            self._public_key = PublicKey(p, self.curve)
-
-        return self._public_key
-
-
-    def __repr__(self):
-        return f"PrivateKey=({self.secret})"
-
-
-def generate_keypair(curve):
-    """Generates a (private_key, public_key) pair for a given curve. """
+def generate_keypair(curve: Curve) -> tuple[PrivateKey, PublicKey]:
+    """Generates a (private_key, public_key) pair for a given curve."""
     private_key = PrivateKey(curve=curve)
-    public_key  = private_key.public_key()
+    public_key = private_key.public_key
 
     return private_key, public_key
