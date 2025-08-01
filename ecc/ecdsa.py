@@ -1,116 +1,54 @@
-# Implementation of ECDSA (Elliptic Curve Digital Signature Algorithm)
-#
-# ECDSA is a digital signature algorithm that uses elliptic curve cryptography.
-#
-# The algorithm consists of two main operations:
-# 1. Signature Generation (Sign)
-# 2. Signature Verification (Verify)
-#
-# For signing a message:
-# 1. Generate a random number k in range [1, n-1]
-# 2. Calculate point (x1, y1) = k * G
-# 3. Calculate r = x1 mod n (if r = 0, go back to step 1)
-# 4. Calculate s = k^(-1) * (z + r * private_key) mod n (if s = 0, go back to step 1)
-# 5. The signature is (r, s)
-#
-# For verifying a signature:
-# 1. Calculate w = s^(-1) mod n
-# 2. Calculate u1 = z * w mod n
-# 3. Calculate u2 = r * w mod n
-# 4. Calculate point (x1, y1) = u1 * G + u2 * public_key
-# 5. Verify that r ≡ x1 (mod n)
-
+"""
+This module implements the core logic for the Elliptic Curve Digital Signature
+Algorithm (ECDSA), including deterministic nonce generation as specified in
+RFC 6979.
+"""
 
 import hashlib
-from secrets import randbelow
-
-from .point import Point
-from .keys import PublicKey, PrivateKey
+import hmac
 
 
 class Signature:
-    """Represents an ECDSA signature (r, s)."""
+    """Represents an ECDSA signature, consisting of two integers (r, s)."""
+
     def __init__(self, r: int, s: int):
         self.r = r
         self.s = s
 
-    def __repr__(self):
-        return f"<Signature \n\tr=0x{self.r:x}, \n\ts=0x{self.s:x}\n>"
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, Signature):
+            return NotImplemented
+        return self.r == other.r and self.s == other.s
+
+    def __repr__(self) -> str:
+        return f"Signature(\n\tr=0x{self.r:x}, \n\ts=0x{self.s:x}\n)"
 
 
-def _hash_msg(message: bytes, n: int) -> int:
+def _rfc6979_nonce(secret: int, n: int, message_hash: bytes) -> int:
     """
-    Hashes the message with SHA-256 and truncates to 
-    modulo n to produce an integer in [0, n-1].
+    Generates a deterministic nonce 'k' as per RFC 6979.
+    This is safer than using a random number generator.
     """
-    h = hashlib.sha256(message).digest()
-    z = int.from_bytes(h, 'big')
+    hash_len = 32  # For SHA-256
 
-    return z % n
+    # Set values for HMAC key 'K' and value to hash 'V'
+    V = b"\x01" * hash_len
+    K = b"\x00" * hash_len
 
+    # Private Key in bytes
+    private_key = secret.to_bytes(hash_len, "big")
 
-def sign(message: bytes, private: PrivateKey) -> Signature:
-    """
-    Generate an ECDSA signature on 'message' using 'private' (PrivateKey).
-    Returns a Signature(r, s).
-    """
-    curve  = private.curve
-    n      = curve.n
-    Gx, Gy = curve.G
-    
-    z = _hash_msg(message, n)
-    G = Point(Gx, Gy, curve)
+    K = hmac.new(K, V + b"\x00" + private_key + message_hash, hashlib.sha256).digest()
+    V = hmac.new(K, V, hashlib.sha256).digest()
+    K = hmac.new(K, V + b"\x01" + private_key + message_hash, hashlib.sha256).digest()
+    V = hmac.new(K, V, hashlib.sha256).digest()
 
     while True:
-        # Generate nonce k [1, n-1]
-        k = randbelow(n-1) + 1
+        V = hmac.new(K, V, hashlib.sha256).digest()
+        k = int.from_bytes(V, "big")
 
-        # Compute for r
-        R = k * G
-        r = R.x.num % n
+        if 1 <= k < n:
+            return k
 
-        if r == 0:
-            continue
-        
-        # Compute s = k^-1(z + rp) mod n
-        k_inv = pow(k, -1, n)
-        s = (k_inv * (z + r * private.secret)) % n
-
-        if s == 0:
-            continue
-
-        return Signature(r, s)
-
-
-def verify(message: bytes, sign: Signature, public: PublicKey) -> bool:
-    """
-    Verify an ECDSA 'sign' on 'message' using the public key 'public'.
-    Returns True if valid, False otherwise.
-    """
-    curve  = public.curve
-    n      = curve.n
-    Gx, Gy = curve.G
-    
-    r, s = sign.r, sign.s 
-    
-    # Check if s and r in between 1 and n-1
-    if not (1 <= r < n and 1 <= s < n):
-        return False
-
-    z = _hash_msg(message, n)
-    s_inv = pow(s, -1, n)
-
-    # Compute u1 = z·s⁻¹ mod n, u2 = r·s⁻¹ mod n
-    u1 = (z * s_inv) % n
-    u2 = (r * s_inv) % n
-
-    # Compute P = u1*G + u2*Q
-    G = Point(Gx, Gy, curve)
-    P = u1 * G + u2 * public.point
-    
-    if P.x is None:
-        return False
-
-    return (P.x.num % n) == r
-
-
+        K = hmac.new(K, V + b"\x00", hashlib.sha256).digest()
+        V = hmac.new(K, V, hashlib.sha256).digest()
