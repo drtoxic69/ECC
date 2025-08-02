@@ -10,6 +10,9 @@ wheels/
 # uv
 .hypothesis
 
+# coverage
+.coverage
+
 # Virtual environments
 .venv
 .env
