@@ -15,7 +15,15 @@ The operations are:
 """
 
 from __future__ import annotations
+
+import typing
+
 from .field import FieldElement
+
+# To provide a type hint for the Curve class, which is defined elsewhere
+# and would otherwise cause a circular import or NameError.
+if typing.TYPE_CHECKING:
+    from .curve import Curve
 
 
 class Point:
@@ -27,7 +35,7 @@ class Point:
     parameters (a, b) and a prime modulo P.
     """
 
-    def __init__(self, x: int, y: int | None, curve):
+    def __init__(self, x: int | None, y: int | None, curve: Curve):
         """
         Arguments:
             x, y    : (x, y) on the curve over the Field E(Z/pZ)
@@ -37,14 +45,20 @@ class Point:
 
         if x is None and y is None:
             self.x, self.y = None, None
-        else:
-            self.x = FieldElement(x, curve.P)
-            self.y = FieldElement(y, curve.P)
+            return
 
-            if self.y**2 != self.x**3 + curve.a * self.x + curve.b:
-                raise ValueError(f"Point({x}, {y}) is not on the curve.")
+        if x is None or y is None:
+            raise ValueError(
+                "Invalid coordinates: both x and y must be integers, or both must be None."
+            )
 
-    def __add__(self, other) -> "Point":
+        self.x = FieldElement(x, curve.P)
+        self.y = FieldElement(y, curve.P)
+
+        if self.y**2 != self.x**3 + curve.a * self.x + curve.b:
+            raise ValueError(f"Point({x}, {y}) is not on the curve.")
+
+    def __add__(self, other: Point) -> Point:
         """Performs elliptic curve point addition.
 
         Let's say we have two distinct point P and Q, we want
@@ -68,6 +82,11 @@ class Point:
             return other
         if other.x is None:
             return self
+
+        # After the identity checks, we know both points have non-None coordinates
+        # Assestion for Type safety
+        assert self.x is not None and self.y is not None
+        assert other.x is not None and other.y is not None
 
         # Checks for Point doubling and additive inverses
         if self.x == other.x:
@@ -142,4 +161,6 @@ class Point:
         if self.x is None:
             return "Point(infinity)"
 
+        # Assertion for Type safety
+        assert self.x is not None and self.y is not None
         return f"Point(\n\t{self.x.num}, \n\t{self.y.num}\n)"

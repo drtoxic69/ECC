@@ -1,10 +1,9 @@
-from .field import FieldElement
-from .point import Point
 from .curve import Curve
-from .keys import generate_keypair, PublicKey, PrivateKey
-from .ecdsa import Signature
-
 from .curves.secp256k1 import secp256k1
+from .ecdsa import Signature
+from .field import FieldElement
+from .keys import PrivateKey, PublicKey, generate_keypair
+from .point import Point
 
 __all__ = [
     "FieldElement",
@@ -15,6 +14,4 @@ __all__ = [
     "PublicKey",
     "PrivateKey",
     "Signature",
-    "sign",
-    "verify",
 ]

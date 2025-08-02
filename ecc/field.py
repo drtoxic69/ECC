@@ -27,7 +27,7 @@ class FieldElement:
         self.num = num % prime
         self.prime = prime
 
-    def _normalize(self, other: object) -> FieldElement:
+    def _normalize(self, other: int | FieldElement) -> FieldElement:
         """Helper function to check type, and convert integer to FieldElement"""
         if isinstance(other, int):
             return FieldElement(other, self.prime)
@@ -44,28 +44,28 @@ class FieldElement:
             f"Unsupported operand type(s) for FieldElement: '{type(other).__name__}'"
         )
 
-    def __add__(self, other: object) -> FieldElement:
+    def __add__(self, other: int | FieldElement) -> FieldElement:
         other = self._normalize(other)
         return FieldElement((self.num + other.num) % self.prime, self.prime)
 
-    def __radd__(self, other: object) -> FieldElement:
+    def __radd__(self, other: int | FieldElement) -> FieldElement:
         return self + other
 
-    def __sub__(self, other: object) -> FieldElement:
+    def __sub__(self, other: int | FieldElement) -> FieldElement:
         other = self._normalize(other)
         return FieldElement((self.num - other.num) % self.prime, self.prime)
 
-    def __rsub__(self, other: object) -> FieldElement:
+    def __rsub__(self, other: int | FieldElement) -> FieldElement:
         return self - other
 
-    def __mul__(self, other: object) -> FieldElement:
+    def __mul__(self, other: int | FieldElement) -> FieldElement:
         other = self._normalize(other)
         return FieldElement((self.num * other.num) % self.prime, self.prime)
 
-    def __rmul__(self, other: object) -> FieldElement:
+    def __rmul__(self, other: int | FieldElement) -> FieldElement:
         return self * other
 
-    def __truediv__(self, other: object) -> FieldElement:
+    def __truediv__(self, other: int | FieldElement) -> FieldElement:
         other = self._normalize(other)
 
         inv = pow(other.num, -1, self.prime)
@@ -73,7 +73,7 @@ class FieldElement:
 
         return FieldElement(num, self.prime)
 
-    def __rtruediv__(self, other: object) -> FieldElement:
+    def __rtruediv__(self, other: int | FieldElement) -> FieldElement:
         other = self._normalize(other)
         return other / self
 
@@ -85,7 +85,7 @@ class FieldElement:
         return FieldElement(pow(self.num, exponent, self.prime), self.prime)
 
     def __eq__(self, other: object) -> bool:
-        if other is None:
+        if not isinstance(other, FieldElement):
             return NotImplemented
 
         return self.num == other.num and self.prime == other.prime

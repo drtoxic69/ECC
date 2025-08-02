@@ -1,6 +1,7 @@
-from hypothesis import given, strategies as st
-from ecc.curves import secp256k1
-from ecc import PrivateKey, Signature, generate_keypair
+from hypothesis import given
+from hypothesis import strategies as st
+
+from ecc import PrivateKey, Signature, generate_keypair, secp256k1
 
 # --- Official RFC 6979 Test Vector for secp256k1 ---
 # Source: RFC 6979, Appendix A.2.5

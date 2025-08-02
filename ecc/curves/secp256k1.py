@@ -1,6 +1,5 @@
 from ecc import Curve
 
-
 a = 0
 b = 7
 

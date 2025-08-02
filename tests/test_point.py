@@ -1,8 +1,8 @@
 import pytest
-from hypothesis import given, strategies as st
+from hypothesis import given
+from hypothesis import strategies as st
 
-from ecc import Point, Curve
-from ecc import secp256k1
+from ecc import Curve, Point, secp256k1
 
 # --- Test Setup ---
 P = 17
@@ -29,12 +29,12 @@ class TestPointErrors:
         p1 = G
         p2 = secp256k1.G
         with pytest.raises(TypeError, match="Points are not on the same curve"):
-            p1 + p2
+            p1 + p2  # pyright: ignore[reportUnusedExpression]
 
     def test_rmul_by_non_integer(self):
         """Scalar multiplication requires an integer scalar."""
         with pytest.raises(TypeError, match="Scalar must be an integer"):
-            2.5 * G
+            2.5 * G  # pyright: ignore[reportUnusedExpression, reportOperatorIssue]
 
 
 # --- Testing Edge Cases and Core Operations ---
@@ -56,6 +56,10 @@ class TestPointOperations:
 
     def test_additive_inverse(self):
         """Test that adding a point to its inverse results in infinity."""
+
+        # Assertion: Type safety
+        assert G.x is not None and G.y is not None
+
         p_inv = Point(G.x.num, -G.y.num, curve)
         assert G + p_inv == identity
 

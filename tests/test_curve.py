@@ -1,4 +1,5 @@
 import pytest
+
 from ecc import Curve, Point
 
 curve = Curve(P=17, a=2, b=2, G=(5, 1), n=19, h=1, name="toy_curve")
@@ -35,6 +36,10 @@ class TestCurve:
         """Test that the G property returns a valid Point object."""
         G = curve.G
         assert isinstance(G, Point)
+
+        # Assertion: Type safety
+        assert G.x is not None and G.y is not None
+
         assert G.x.num == 5 and G.y.num == 1
         assert G.curve == curve
 

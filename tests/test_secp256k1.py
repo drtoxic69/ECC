@@ -1,6 +1,7 @@
-from hypothesis import given, strategies as st
-from ecc import secp256k1
-from ecc import PrivateKey
+from hypothesis import given
+from hypothesis import strategies as st
+
+from ecc import PrivateKey, secp256k1
 
 
 class TestSecp256k1Integration:
@@ -14,6 +15,10 @@ class TestSecp256k1Integration:
         """The secp256k1 generator point G must satisfy the curve equation."""
         G = secp256k1.G
         assert G is not None, "Generator point should not be None"
+
+        # Assertion: type safety
+        assert G.x is not None and G.y is not None
+
         assert G.y**2 == G.x**3 + secp256k1.a * G.x + secp256k1.b
 
     def test_point_order_is_correct(self):
@@ -39,6 +44,9 @@ class TestSecp256k1Integration:
 
         two_G_x = 0xC6047F9441ED7D6D3045406E95C07CD85C778E4B8CEF3CA7ABAC09B95C709EE5
         two_G_y = 0x1AE168FEA63DC339A3C58419466CEAEEF7F632653266D0E1236431A950CFE52A
+
+        # Assertion: type safety
+        assert two_G.x is not None and two_G.y is not None
 
         assert two_G.x.num == two_G_x
         assert two_G.y.num == two_G_y
@@ -71,5 +79,8 @@ def test_generated_public_key_is_valid(secret):
     """
     private_key = PrivateKey(secret=secret, curve=secp256k1)
     point = private_key.public_key.point
+
+    # Assertion: type safety
+    assert point.x is not None and point.y is not None
 
     assert point.y**2 == point.x**3 + secp256k1.a * point.x + secp256k1.b

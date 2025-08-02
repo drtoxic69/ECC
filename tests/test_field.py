@@ -1,5 +1,6 @@
 import pytest
-from hypothesis import given, strategies as st
+from hypothesis import given
+from hypothesis import strategies as st
 
 from ecc import FieldElement
 
@@ -12,7 +13,7 @@ class TestFieldElementErrors:
 
     def test_init_invalid_type(self):
         with pytest.raises(TypeError, match="Number and prime must be integers."):
-            FieldElement(3.5, 13)
+            FieldElement(3.5, 13)  # type: ignore
 
     def test_add_mismatched_fields(self):
         a = FieldElement(7, 13)
@@ -20,13 +21,13 @@ class TestFieldElementErrors:
         with pytest.raises(
             TypeError, match="Cannot operate on FieldElements from different fields."
         ):
-            a + b
+            a + b  # pyright: ignore[reportUnusedExpression]
 
     def test_division_by_zero(self):
         a = FieldElement(7, 13)
         b = FieldElement(0, 13)
         with pytest.raises((ValueError, ZeroDivisionError)):
-            a / b
+            a / b  # pyright: ignore[reportUnusedExpression]
 
 
 # --- Testing Edge Cases and Reflected Operations ---

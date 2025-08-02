@@ -4,6 +4,7 @@ in the short Weierstrass form.
 """
 
 from __future__ import annotations
+
 from functools import cached_property
 
 from .field import FieldElement
@@ -21,7 +22,7 @@ class Curve:
         G: tuple[int, int],
         n: int,
         h: int = 1,
-        name: str = None,
+        name: str | None = None,
     ):
         """
         parameters:

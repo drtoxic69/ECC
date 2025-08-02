@@ -14,13 +14,14 @@ Public Key - The point P = k * G, on the elliptic curve with Field E(Z/pZ)
 """
 
 from __future__ import annotations
+
+import hashlib
 from functools import cached_property
 from secrets import randbelow
-import hashlib
 
 from .curve import Curve
-from .point import Point
 from .ecdsa import Signature, _rfc6979_nonce
+from .point import Point
 
 
 class PublicKey:
@@ -65,12 +66,10 @@ class PublicKey:
         return self.point == other.point
 
     def __repr__(self) -> str:
-        if (self.point.x, self.point.y) == (None, None):
+        if self.point.x is None or self.point.y is None:
             return "PublicKey(Point(infinity))"
 
-        return (
-            f"PublicKey(\n\tx={hex(self.point.x.num)}, \n\ty={hex(self.point.y.num)}\n)"
-        )
+        return f"PublicKey(\n\tx=0x{self.point.x.num:x}, \n\ty=0x{self.point.y.num:x})"
 
 
 class PrivateKey:
@@ -109,6 +108,10 @@ class PrivateKey:
             k = _rfc6979_nonce(self.secret, n, message_hash)
 
             R = k * self.curve.G
+
+            if R.x is None:
+                continue
+
             r = R.x.num % n
             if r == 0:
                 continue

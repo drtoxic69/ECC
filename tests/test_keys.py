@@ -1,9 +1,8 @@
 import pytest
-from hypothesis import given, strategies as st
+from hypothesis import given
+from hypothesis import strategies as st
 
-from ecc import Point, Curve
-from ecc import PrivateKey, PublicKey, generate_keypair
-from ecc import secp256k1
+from ecc import Curve, Point, PrivateKey, PublicKey, generate_keypair, secp256k1
 
 # --- Test Setup ---
 curve = Curve(P=17, a=2, b=2, G=(5, 1), n=19)
@@ -95,7 +94,7 @@ class TestKeyGeneration:
     def test_error_on_missing_curve(self):
         """The curve is a required keyword-only argument."""
         with pytest.raises(TypeError):
-            PrivateKey(secret=5)
+            PrivateKey(secret=5)  # pyright: ignore[reportCallIssue]
 
 
 # --- Property-Based Testing ---
