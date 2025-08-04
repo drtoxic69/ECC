@@ -1,127 +1,136 @@
-# ECC
+# eccrypto: Elliptic Curve Cryptography from Scratch
 
-[![PyPI version](https://badge.fury.io/py/eccrypto.svg)](https://pypi.org/project/eccrypto/)
-[![License](https://img.shields.io/github/license/drtoxic69/ECC)](./LICENSE)
-[![Downloads](https://img.shields.io/pypi/dm/eccrypto)](https://pypi.org/project/eccrypto/)
-[![Issues](https://img.shields.io/github/issues/drtoxic69/ECC)](https://github.com/drtoxic69/ECC/issues)
+[![PyPI version](https://img.shields.io/pypi/v/eccrypto.svg)](https://pypi.org/project/eccrypto/)
+[![Downloads](https://static.pepy.tech/badge/eccrypto)](https://pepy.tech/project/eccrypto)
+[![GitHub license](https://img.shields.io/github/license/drtoxic69/ECC)](https://github.com/drtoxic69/ECC/blob/main/LICENSE)
+[![Code Quality](https://github.com/drtoxic69/ECC/actions/workflows/code-quality.yaml/badge.svg)](https://github.com/drtoxic69/ECC/actions/workflows/code-quality.yaml)
 
 
-A pure Python library for **Elliptic Curve Cryptography (ECC)** — built from scratch with clarity and educational readability in mind.
-Supports digital signatures (ECDSA), key generation, and secure field arithmetic over common curves like `secp256k1`, `P-256`, and more.
+A pure Python library for **Elliptic Curve Cryptography (ECC)**, built from scratch with a focus on security, clarity, and modern Python practices.
+
+This library provides the essential cryptographic primitives for digital signatures and key exchange, implemented with secure, constant-time algorithms and a clean, object-oriented API. It's an excellent tool for learning the fundamentals of ECC or for projects that require a clear and auditable cryptographic implementation.
 
 ---
 
 ## ✨ Features
-- Finite field arithmetic over prime fields (`FieldElement`)
-- Curve definition (`Curve` and `Point`)
-- ECC point addition, doubling, and scalar multiplication
-- Key pair generation (`keys.py`)
-- ECDSA signature generation and verification (`ecdsa.py`)
-- Built-in support for popular curves (`secp256k1`, `P-256`, `brainpool`, etc.)
-- Easy-to-understand documentation in every module for educational purposes
+
+* **Secure by Default**:
+    * **Constant-Time** scalar multiplication (Montgomery Ladder) to prevent timing side-channel attacks.
+    * **Deterministic Signatures (RFC 6979)** to eliminate risks from faulty random number generators.
+    * **Non-Malleable Signatures** ("low-s" normalization) to prevent signature tampering.
+* **Modern API**: A clean, object-oriented interface for key management, signing, and verification.
+* **Key Exchange**: Built-in support for **Elliptic Curve Diffie-Hellman (ECDH)** key exchange with a standard HKDF.
+* **Core Primitives**: Includes all necessary building blocks, such as `FieldElement` and `Point` arithmetic.
+* **Standard Curves**: Comes with built-in support for the `secp256k1` curve.
 
 ---
 
 ## 📦 Installation
 
-### From PyPI:
+Install the library from PyPI using `uv`:
+```bash
+uv add eccrypto
+```
+or by using `pip`:
 ```bash
 pip install eccrypto
 ```
 
-## 🔍 Quick Examples
+---
+
+## 🚀 Quick Start
+
+Here are some examples of how to use the library for common cryptographic tasks.
 
 ### 🔑 Key Generation
-
-```python
-from ecc import generate_keypair
-from ecc import secp256k1
-
-priv, pub = generate_keypair(secp256k1)
-
-print("Private Key:\n", priv)
-print("Public Key:\n", pub)
-```
-
-### ✍️ ECDSA Sign & Verify
+First, import the `secp256k1` curve and the `generate_keypair` helper function.
 
 ```python
 from ecc import secp256k1
 from ecc import generate_keypair
-from ecc import sign, verify
 
-priv, pub = generate_keypair(secp256k1)
+# Generate a new private and public key pair
+private_key, public_key = generate_keypair(secp256k1)
 
-msg = b"Heyy! :D"
-signature = sign(msg, priv)
-print("Signature:", signature)
-
-valid = verify(msg, signature, pub)
-
-if valid:
-    print("The signtature is valid!")
+print("Private Key:", private_key)
+print("Public Key:", public_key)
 ```
 
-### 📌 Curve and Point Usage
+### ✍️ ECDSA Signing & Verification
+Use the key pair to create and verify a digital signature.
 
 ```python
-from ecc import Curve, Point
+# Assume `private_key` and `public_key` from the step above
+message = b":D"
 
-a, b = 2, 2             # Curve: y^2 = x^3 + 2x + 2
+# Alice signs the message with her private key
+signature = private_key.sign(message)
+print(f"Signature: {signature}")
 
-P = 17                  # Prime modulus
-G = (5, 1)              # Generator Point
-n = 19                  # Number of points in E(Z/17Z)
+# Bob verifies the signature with Alice's public key
+is_valid = public_key.verify(message, signature)
 
-curve = Curve(a, b, P, G, n)
-print(curve)
-
-G = Point(5, 1, curve)
-print("Generator point: ", G)
-
-P  = 2 * G              # Scalar Multiplication
-P1 = P + P              # Point Addition
-
-print("2G = ", P)
-print("2G + 2G = ", P1)
+if is_valid:
+    print("✅ Signature is valid!")
+else:
+    print("❌ Signature is invalid!")
 ```
 
-### 🔢 Field Arithmetic
+### 🤝 ECDH Key Exchange
+Establish a shared secret between two parties (Alice and Bob).
 
 ```python
-from ecc import FieldElement
+# Alice and Bob both generate their own key pairs
+alice_priv, alice_pub = generate_keypair(secp256k1)
+bob_priv, bob_pub = generate_keypair(secp256k1)
 
-a = FieldElement(7, 13)
-b = FieldElement(8, 13)
+# Alice computes the secret using her private key and Bob's public key
+secret_by_alice = alice_priv.ecdh(bob_pub)
 
-print("a + b =", a + b)
-print("a * b =", a * b)
-print("a ** -1 =", a ** -1)  # Inverse of a
+# Bob computes the secret using his private key and Alice's public key
+secret_by_bob = bob_priv.ecdh(alice_pub)
+
+# The secrets must be identical
+assert secret_by_alice == secret_by_bob
+print(f"\n✅ Shared secret derived successfully: 0x{secret_by_alice.hex()}")
 ```
 
 ---
 
-## 🧪 Testing
+## 📚 Documentation
 
-You can run the test suite using pytest:
+For a deeper dive into the mathematical concepts behind finite fields, elliptic curve group theory, and the discriminant, please see our detailed documentation:
+
+* [**Mathematical Foundations**](./ecc/README.md)
+
+---
+
+## 🛠️ Development & Testing
+
+To set up the project for development, clone the repository and install the test dependencies:
 
 ```bash
-pytest
+# clone the repo
+git clone git@github.com:drtoxic/ECC.git
+cd ECC
+
+# source the venv
+source .venv/bin/activate
+
+# sync
+uv sync
 ```
-
-All tests are located in the `tests/` directory and cover field arithmetic, point operations, key generation, and ECDSA functionality.
-
 ---
 
-## 🤝 Contributions Welcome
+## 🤝 Contributions
 
-PRs for adding new curves, improving documentation, and optimizations are welcome. Please make sure all tests pass.
+Contributions, issues, and feature requests are welcome. Please feel free to open an issue or submit a pull request.
 
 ---
 
 ## 📄 License
 
-Licensed under the GPL-3.0 License. See [LICENSE](./LICENSE).
+This project is licensed under the GPL-3.0 License. See [LICENSE](./LICENSE).
 
 ---
 
