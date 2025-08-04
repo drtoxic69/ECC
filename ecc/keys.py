@@ -20,6 +20,7 @@ from functools import cached_property
 from secrets import randbelow
 
 from .curve import Curve
+from .ecdh import generate_shared_secret
 from .ecdsa import Signature, _rfc6979_nonce
 from .point import Point
 
@@ -126,6 +127,20 @@ class PrivateKey:
                 s = n - s
 
             return Signature(r, s)
+
+    def ecdh(self, public_key: PublicKey, **kdf_params) -> bytes:
+        """
+        Performs an ECDH key exchange to generate a shared secret.
+
+        Args:
+            public_key   : The public key of the other party.
+            **kdf_params : Optional parameters for the Key Derivation Function
+                           (e.g., salt, info, key_length).
+
+        Returns:
+            A cryptographically strong shared secret.
+        """
+        return generate_shared_secret(self, public_key, **kdf_params)
 
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, PrivateKey):
