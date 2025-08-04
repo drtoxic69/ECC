@@ -112,7 +112,6 @@ toml = [
 
 [[package]]
 name = "eccrypto"
-version = "0.1.2"
 source = { editable = "." }
 
 [package.dev-dependencies]

@@ -80,6 +80,7 @@ class FieldElement:
     def __pow__(self, exponent: int) -> FieldElement:
         if not isinstance(exponent, int):
             raise TypeError("Exponent must be an integer.")
+
         # Fermat's Little Theorem
         exponent = exponent % (self.prime - 1)
         return FieldElement(pow(self.num, exponent, self.prime), self.prime)

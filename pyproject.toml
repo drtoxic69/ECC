@@ -1,6 +1,5 @@
 [project]
 name = "eccrypto"
-version = "0.1.2"
 description = "Pure Python library for Elliptic Curve Cryptography (ECC) — built from scratch with clarity and educational readability in mind"
 readme = "README.md"
 license = { text = "GPL-3.0" }
